@@ -8,11 +8,9 @@
 li.nav-item {
     padding-right: 20px;
 }
-
 .modal-preauth{
     display:block;
 }
-
 .modal-postauth{
     display:none;
 }
@@ -24,6 +22,6 @@ input{
     width: 100%;
 }
 textarea{
-    width: 90%;
+    width: 92%;
     min-height: 150px;
 }

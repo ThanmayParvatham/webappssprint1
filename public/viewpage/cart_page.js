@@ -5,11 +5,11 @@ import { currentUser } from '../controller/firebase_auth.js';
 import { currency,disableButton,enableButton, info } from './util.js';
 import { home_page } from './home_page.js';
 import { DEV } from '../model/constants.js';
+import { checkout } from '../controller/firestore_controller.js';
 export function addEventListeners() {
     MENU.Cart.addEventListener('click', async () => {
         history.pushState(null, null, ROUTE_PATHNAMES.CART);
         await cart_page();
-
     });
 }
 export let cart;
@@ -18,6 +18,7 @@ export async function cart_page() {
         root.innerHTML = '<h1>Protected Page</h1>';
         return;
     }
+
     let html = '<h1>Shopping Cart</h1>'
     if (!cart || cart.getTotalQty() == 0) {
         html += '<h3>Empty! Buy More!</h3>';
@@ -39,7 +40,6 @@ export async function cart_page() {
     </thead>
     <tbody>
     `;
-
     cart.items.forEach(item => {
         html+=`
         <tr>
@@ -75,6 +75,7 @@ export async function cart_page() {
     checkoutButton.addEventListener('click',async()=>{
         const label = disableButton(checkoutButton);
         try{
+            await checkout(cart);
             info('Success!','Checkout Complete!');
             cart.clear();
             MENU.CartItemCount.innerHTML = 0;
@@ -87,7 +88,6 @@ export async function cart_page() {
         enableButton(checkoutButton,label);
     });
 }
-
 export function initShoppingCart() {
     cart = new ShoppingCart(currentUser.uid);
     MENU.CartItemCount.innerHTML = 0;

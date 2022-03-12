@@ -9,6 +9,7 @@ export class Product {
             this.qty = Number.isInteger(data.qty) ? data.qty : null;
         }
     }
+
     clone(){
         const copyData = this.serialize();
         const p = new Product(copyData);
@@ -20,6 +21,7 @@ export class Product {
         this.docId = id;
     }
     
+    //toFirestore data, format, etc
     serialize() {
         return {
             name: this.name,

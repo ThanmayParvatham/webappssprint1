@@ -14,7 +14,8 @@ export function addEventListeners(){
     });
 }
 export async function home_page(){
-    let html = '<h1>Enjoy Shopping</h1>';
+
+    let html = '<h1>Enjoy Shopping !</h1>';
     let products;
     try{
         products = await getProductList();
@@ -28,11 +29,12 @@ export async function home_page(){
         if(DEV) console.log(e);
         Util.info('Failed to get the product list',JSON.stringify(e));
     }
-
     for(let i=0;i<products.length;i++){
         html += buildProductView(products[i],i)
     }
+
     root.innerHTML = html;
+
     const productForms = document.getElementsByClassName('form-product-qty');
     for( let i=0 ; i < productForms.length ; i++){
         productForms[i].addEventListener('submit',e => {
