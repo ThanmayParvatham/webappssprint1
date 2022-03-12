@@ -1,7 +1,7 @@
 {
   "hosting": {
     "public": "public",
-    "site": "lesson3part1",
+    "site": "webappsl3p2",
     "ignore": [
       "firebase.json",
       "**/.*",
