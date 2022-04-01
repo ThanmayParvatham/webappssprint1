@@ -63,3 +63,9 @@ export async function updateAccountInfo(uid, updateInfo) {
     const docRef = doc(db, COLLECTION_NAMES.ACCOUNT_INFO, uid);
     await updateDoc(docRef, updateInfo);
 }
+
+export async function returnPurchasedItem(docID, cart) {
+    const docRef = doc(db, COLLECTION_NAMES.PURCHASE_HISTORY, uid);
+    const data = cart.serialize(Date.now());
+    await updateDoc(docRef, data);
+}

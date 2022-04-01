@@ -1,21 +1,21 @@
-import { MENU,root } from './elements.js';
+import { MENU, root } from './elements.js';
 import { ROUTE_PATHNAMES } from '../controller/route.js';
 import * as Util from './util.js';
 import { currentUser } from '../controller/firebase_auth.js';
 import { getPurchaseHistory } from '../controller/firestore_controller.js';
 import { DEV } from '../model/constants.js';
 import { modalTransaction } from './elements.js';
-export function addEventListeners(){
-    MENU.Purchases.addEventListener('click',async() => {
-        history.pushState(null,null,ROUTE_PATHNAMES.PURCHASES);
+export function addEventListeners() {
+    MENU.Purchases.addEventListener('click', async () => {
+        history.pushState(null, null, ROUTE_PATHNAMES.PURCHASES);
         const label = Util.disableButton(MENU.Purchases);
         await purchases_page();
-        Util.enableButton(MENU.Purchases,label);
+        Util.enableButton(MENU.Purchases, label);
     });
 }
 
-export async function purchases_page(){
-    if(!currentUser){
+export async function purchases_page() {
+    if (!currentUser) {
         root.innerHTML = '<h1> Protected Page</h1>';
         return;
     }
@@ -23,17 +23,18 @@ export async function purchases_page(){
     let html = '<h1>Purchase History</h1>'
 
     let carts;
-    try{
+    try {
         carts = await getPurchaseHistory(currentUser.uid);
-        if(carts.length == 0){
+        console.log(JSON.stringify(carts));
+        if (carts.length == 0) {
             html += '<h3>No Purchase History Found!</h3>';
             root.innerHTML = html;
             return;
         }
 
-    }catch(e){
-        if(DEV) console.log(e);
-        Util.info('Error in getPurchaseHistory',JSON.stringify(e));
+    } catch (e) {
+        if (DEV) console.log(e);
+        Util.info('Error in getPurchaseHistory', JSON.stringify(e));
         root.innerHTML = '<h1>Failed to get purchase history</h1>';
         return;
     }
@@ -51,7 +52,7 @@ export async function purchases_page(){
     <tbody>
     `;
 
-    for(let i=0;i<carts.length;i++){
+    for (let i = 0; i < carts.length; i++) {
         html += `
         <tr>
             <td>
@@ -67,21 +68,37 @@ export async function purchases_page(){
         `;
     }
 
-    html+='</tbody></table>';
+    html += '</tbody></table>';
     root.innerHTML = html;
 
     const detailsFrom = document.getElementsByClassName('form-purchase-details');
-    for(let i=0;i<detailsFrom.length;i++){
-        detailsFrom[i].addEventListener('submit',e=>{
+    for (let i = 0; i < detailsFrom.length; i++) {
+        detailsFrom[i].addEventListener('submit', e => {
             e.preventDefault();
             const index = e.target.index.value;
             modalTransaction.title.innerHTML = `Purchased At: ${new Date(carts[index].timestamp).toString()}`;
-            modalTransaction.body.innerHTML = buildTransactionView(carts[index]);
+            modalTransaction.body.innerHTML = buildTransactionView(carts[index], index);
             modalTransaction.modal.show();
+            const returnForms = document.getElementsByClassName('form-return-item');
+            for (let i = 0; i < returnForms.length; i++) {
+                returnForms[i].addEventListener('submit', e => {
+                    e.preventDefault();
+                    const returnProductName = e.target.returnProductName.value;
+                    const currentIndex = e.target.currentIndex.value;
+                    const productDetail = carts[currentIndex];
+                    console.log(JSON.stringify(carts));
+                const newCartItems = productDetail.items.filter(e=> e.name != returnProductName );
+               // productDetail.items = newCartItems;
+                //console.log(returnProductName +" "+ currentIndex + " " +JSON.stringify(productDetail.items) + " ");
+                //alert("Are you sure !");
+                
+
+                })
+            }
         })
     }
 }
-function buildTransactionView(cart){
+function buildTransactionView(cart, index) {
     let html = `
     <table class="table">
     <thead>
@@ -97,7 +114,7 @@ function buildTransactionView(cart){
     <tbody>
     `;
     cart.items.forEach(p => {
-        html+=`
+        html += `
             <tr>
                 <td><img src="${p.imageURL}" width= "80px"></td>
                 <td>${p.name}</td>
@@ -105,10 +122,17 @@ function buildTransactionView(cart){
                 <td>${p.qty}</td>
                 <td>${Util.currency(p.price * p.qty)}</td>
                 <td>${p.summary}</td>
+                <td>
+                <form method="post" class="form-return-item">
+                    <input type="hidden" name="currentIndex" value="${index}">
+                    <input type="hidden" name="returnProductName" value="${p.name}">
+                    <button type="submit" class="btn btn-outline-primary">Return</button>
+                 </form>
+                </td>
             </tr>
         `;
     });
-    html +="</tbody></table>"
+    html += "</tbody></table>"
     html += `
         <div class="fs-3">Total: ${Util.currency(cart.getTotalPrice())}</div>
     `;
