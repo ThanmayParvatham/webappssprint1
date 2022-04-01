@@ -36,6 +36,9 @@ export class ShoppingCart {
     clear(){
         this.items.length = 0;
     }
+    setDocId(docId){
+        this.docId = docId;
+    }
     serialize(timestamp){
         const serializedItems = this.items.map(e => e.serialize());
         return {uid: this.uid, items: serializedItems, timestamp}

@@ -1,13 +1,13 @@
 import {
     getFirestore,
-    query,collection,
+    query, collection,
     orderBy,
-    getDocs,getDoc,
-    setDoc,addDoc,
-    where,doc, updateDoc,
+    getDocs, getDoc,
+    setDoc, addDoc,
+    where, doc, updateDoc, deleteDoc
 } from "https://www.gstatic.com/firebasejs/9.6.8/firebase-firestore.js";
 import { AccountInfo } from "../model/account_info.js";
-
+import { purchases_page } from "../viewpage/purchases_page.js";
 import { COLLECTION_NAMES } from "../model/constants.js";
 import { Product } from "../model/product.js";
 import { ShoppingCart } from "../model/shopping_cart.js";
@@ -36,10 +36,11 @@ export async function getPurchaseHistory(uid) {
         where('uid', '==', uid),
         orderBy('timestamp', 'desc'));
     const snapShot = await getDocs(q);
-
+    //console.log("** " + JSON.stringify(q));
     const carts = [];
     snapShot.forEach(doc => {
         const sc = ShoppingCart.deserialize(doc.data());
+        sc.setDocId(doc.id)
         carts.push(sc);
     });
     return carts;
@@ -64,8 +65,20 @@ export async function updateAccountInfo(uid, updateInfo) {
     await updateDoc(docRef, updateInfo);
 }
 
-export async function returnPurchasedItem(docID, cart) {
-    const docRef = doc(db, COLLECTION_NAMES.PURCHASE_HISTORY, uid);
-    const data = cart.serialize(Date.now());
-    await updateDoc(docRef, data);
+// export async function returnPurchasedItem(docID, cart) {
+//     const docRef = doc(db, COLLECTION_NAMES.PURCHASE_HISTORY, uid);
+//     const data = cart.serialize(Date.now());
+//     await updateDoc(docRef, data);
+// }
+export async function returnPurchasedItem(productDetail) {
+    const docRef = doc(db, COLLECTION_NAMES.PURCHASE_HISTORY, productDetail.docId);
+    const data = productDetail.serialize(Date.now());
+    if (data.items.length == 0) {
+        await deleteDoc(docRef)
+    }
+    else {
+        await updateDoc(docRef, data);
+    }
+    purchases_page();
+    //console.log(data.items.length);
 }

@@ -2,7 +2,7 @@ import { MENU, root } from './elements.js';
 import { ROUTE_PATHNAMES } from '../controller/route.js';
 import * as Util from './util.js';
 import { currentUser } from '../controller/firebase_auth.js';
-import { getPurchaseHistory } from '../controller/firestore_controller.js';
+import { getPurchaseHistory, returnPurchasedItem } from '../controller/firestore_controller.js';
 import { DEV } from '../model/constants.js';
 import { modalTransaction } from './elements.js';
 export function addEventListeners() {
@@ -25,7 +25,7 @@ export async function purchases_page() {
     let carts;
     try {
         carts = await getPurchaseHistory(currentUser.uid);
-        console.log(JSON.stringify(carts));
+       // console.log("*&*" + JSON.stringify(carts));
         if (carts.length == 0) {
             html += '<h3>No Purchase History Found!</h3>';
             root.innerHTML = html;
@@ -81,18 +81,30 @@ export async function purchases_page() {
             modalTransaction.modal.show();
             const returnForms = document.getElementsByClassName('form-return-item');
             for (let i = 0; i < returnForms.length; i++) {
-                returnForms[i].addEventListener('submit', e => {
+                returnForms[i].addEventListener('submit', async e => {
                     e.preventDefault();
                     const returnProductName = e.target.returnProductName.value;
                     const currentIndex = e.target.currentIndex.value;
                     const productDetail = carts[currentIndex];
-                    console.log(JSON.stringify(carts));
+                    const productDetail1 = carts[currentIndex];
+                    //console.log(JSON.stringify(carts));
                 const newCartItems = productDetail.items.filter(e=> e.name != returnProductName );
-               // productDetail.items = newCartItems;
-                //console.log(returnProductName +" "+ currentIndex + " " +JSON.stringify(productDetail.items) + " ");
-                //alert("Are you sure !");
-                
+                productDetail.items = newCartItems;
+                //console.log("^" + returnProductName +" "+ currentIndex + " " +JSON.stringify(productDetail) + " ");
+                if(confirm("Are you sure !")){
+                    try{
+                        modalTransaction.modal.hide();
+                        await returnPurchasedItem(productDetail);
+                        //modalTransaction.modal.show();
+                        //modalTransaction.modal.hide();
+                        //purchases_page();
+                       // await Util.sleep(1000);
+                        Util.info('Success', 'Successfully requested for return.');
 
+                    } catch(e){
+                        if(DEV) console.log(e);
+                    }
+                }
                 })
             }
         })
@@ -115,7 +127,7 @@ function buildTransactionView(cart, index) {
     `;
     cart.items.forEach(p => {
         html += `
-            <tr>
+            <tr id = "eachItemID">
                 <td><img src="${p.imageURL}" width= "80px"></td>
                 <td>${p.name}</td>
                 <td>${Util.currency(p.price)}</td>
