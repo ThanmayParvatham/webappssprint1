@@ -14,7 +14,7 @@
 </head>
 
 <body>
-  <div class="my-banner">The Amazing Online Store</div>
+  <div class="my-banner">ONEline Store</div>
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
@@ -137,6 +137,29 @@
     </div>
   </div>
 
+  <!-- Comment Modal-->
+  <div class="modal fade" id="modal-create-comment" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="modal-create-comment-label" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal-create-comment-label">Make a comment </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="form-create-comment" method="post">
+            <div>
+              <textarea name="commentContent" cols="50" rows="5" placeholder="content of the comment" required
+                minlength="5"></textarea>
+            </div>
+            <div>
+              <button type="submit" class="btn btn-outline-danger">comment</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Main Root-->
   <div id="root" class="bg-light p-5 m-3"></div>

@@ -3,7 +3,7 @@
     font-size: 200%;
     text-align: center;
     color: white;
-    background-color: navy;
+    background-color: black;
 }
 li.nav-item {
     padding-right: 20px;
@@ -24,4 +24,7 @@ input{
 textarea{
     width: 92%;
     min-height: 150px;
+}
+body{
+    background: lightgrey;
 }

@@ -82,3 +82,8 @@ export async function returnPurchasedItem(productDetail) {
     purchases_page();
     //console.log(data.items.length);
 }
+
+export async function uploadComment(comment) {
+    const data = comment.serialize();
+    const docRef = await addDoc(collection(db, Constants.COLLECTIONS.USER_COMMENTS), data);
+}

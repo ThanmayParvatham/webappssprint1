@@ -1,6 +1,7 @@
-import { MENU, root } from './elements.js';
+import { MENU, modalCreateComment, root } from './elements.js';
 import { ROUTE_PATHNAMES } from '../controller/route.js';
 import * as Util from './util.js';
+import { UserComment } from '../model/userComment.js';
 import { currentUser } from '../controller/firebase_auth.js';
 import { getPurchaseHistory, returnPurchasedItem } from '../controller/firestore_controller.js';
 import { DEV } from '../model/constants.js';
@@ -14,6 +15,7 @@ export function addEventListeners() {
     });
 }
 
+
 export async function purchases_page() {
     if (!currentUser) {
         root.innerHTML = '<h1> Protected Page</h1>';
@@ -25,7 +27,7 @@ export async function purchases_page() {
     let carts;
     try {
         carts = await getPurchaseHistory(currentUser.uid);
-       // console.log("*&*" + JSON.stringify(carts));
+        // console.log("*&*" + JSON.stringify(carts));
         if (carts.length == 0) {
             html += '<h3>No Purchase History Found!</h3>';
             root.innerHTML = html;
@@ -88,23 +90,62 @@ export async function purchases_page() {
                     const productDetail = carts[currentIndex];
                     const productDetail1 = carts[currentIndex];
                     //console.log(JSON.stringify(carts));
-                const newCartItems = productDetail.items.filter(e=> e.name != returnProductName );
-                productDetail.items = newCartItems;
-                //console.log("^" + returnProductName +" "+ currentIndex + " " +JSON.stringify(productDetail) + " ");
-                if(confirm("Are you sure !")){
-                    try{
-                        modalTransaction.modal.hide();
-                        await returnPurchasedItem(productDetail);
-                        //modalTransaction.modal.show();
-                        //modalTransaction.modal.hide();
-                        //purchases_page();
-                       // await Util.sleep(1000);
-                        Util.info('Success', 'Successfully requested for return.');
+                    const newCartItems = productDetail.items.filter(e => e.name != returnProductName);
+                    productDetail.items = newCartItems;
+                    //console.log("^" + returnProductName +" "+ currentIndex + " " +JSON.stringify(productDetail) + " ");
+                    if (confirm("Are you sure !")) {
+                        try {
+                            modalTransaction.modal.hide();
+                            await returnPurchasedItem(productDetail);
+                            //modalTransaction.modal.show();
+                            //modalTransaction.modal.hide();
+                            //purchases_page();
+                            // await Util.sleep(1000);
+                            Util.info('Success', 'Successfully requested for return.');
 
-                    } catch(e){
-                        if(DEV) console.log(e);
+                        } catch (e) {
+                            if (DEV) console.log(e);
+                        }
                     }
-                }
+                })
+            }
+            const commentForms = document.getElementsByClassName('form-comment-item');
+            for (let i = 0; i < commentForms.length; i++) {
+                commentForms[i].addEventListener('submit', async e => {
+                    e.preventDefault();
+                    const commentProductName = e.target.commentProductName.value;
+                    modalCreateComment.show();
+                    const formCreateComment = document.getElementById('form-create-comment');
+                    formCreateComment.addEventListener('submit', async f => {
+                        e.preventDefault();
+                        //await Util.sleep(5000);
+
+                        const commentContent = f.target.commentContent.value;
+                            try {
+                                 const commentEmail = currentUser.email;
+                                const Ctoc = Date.now();
+                                const data = new UserComment();
+                                data.productName = commentProductName;
+                                data.email = commentEmail;
+                                data.comment = commentContent;
+                                data.toc = Ctoc;
+                                // const finalData = new UserComment({
+                                //     commentProductName,
+                                //     commentEmail,
+                                //     commentContent,
+                                //     Ctoc
+                                // });
+                                alert('Reall ?');
+                                console.log("^" + JSON.stringify(data) );
+
+                                //await Util.sleep(50000000000000);
+                                //await Util.sleep(50000000000000);
+
+                            } catch (e) {
+                                if (DEV) console.log(e);
+                            }
+                        
+                    });
                 })
             }
         })
@@ -139,6 +180,12 @@ function buildTransactionView(cart, index) {
                     <input type="hidden" name="currentIndex" value="${index}">
                     <input type="hidden" name="returnProductName" value="${p.name}">
                     <button type="submit" class="btn btn-outline-primary">Return</button>
+                 </form>
+                </td>
+                <td>
+                <form method="post" class="form-comment-item">
+                    <input type="hidden" name="commentProductName" value="${p.name}">
+                    <button type="submit" class="btn btn-outline-primary">Comment</button>
                  </form>
                 </td>
             </tr>

@@ -1,5 +1,9 @@
 //main root element
 export const root = document.getElementById('root');
+
+//export const formCreateComment = document.getElementById('form-create-comment');
+
+
 export const MENU = {
     SignIn : document.getElementById('menu-signin'),
     Home : document.getElementById('menu-home'),
@@ -28,3 +32,4 @@ export const modalSignup = {
     modal:new bootstrap.Modal(document.getElementById('modal-signup'),{backdrop:'static'}),
     form: document.getElementById('modal-signup-form'),
 }
+export const modalCreateComment= new bootstrap.Modal(document.getElementById('modal-create-comment'),{backdrop: 'static'});

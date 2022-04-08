@@ -3,6 +3,7 @@ export const COLLECTION_NAMES = {
     PRODUCT: 'products',
     PURCHASE_HISTORY: 'purchase_history',
     ACCOUNT_INFO: 'account_info',
+    USER_COMMENTS: 'comments',
 }
 export const STORAGE_FOLDER_NAMES = {
     PROFILE_PHOTOS: 'profile_photos/',

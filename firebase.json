@@ -1,7 +1,7 @@
 {
   "hosting": {
     "public": "public",
-    "site": "webappsl3p2",
+    "site": "webappssprint1",
     "ignore": [
       "firebase.json",
       "**/.*",
