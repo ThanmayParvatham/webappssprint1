@@ -115,7 +115,7 @@ export async function getComments(productName) {
     const snapShot = await getDocs(q);
     const comments = [];
     snapShot.forEach(doc => {
-    console.log("** " + JSON.stringify(doc.data()));
+    //console.log("** " + JSON.stringify(doc.data()));
         const eachComment = new UserComment();
         eachComment.email = doc.data().email;
         eachComment.productName = doc.data().productName;
@@ -124,4 +124,17 @@ export async function getComments(productName) {
         comments.push(eachComment);
     });
     return comments;
+}
+export async function checkAlreadyCommented(uemail, productName) {
+    const q = query(collection(db, COLLECTION_NAMES.USER_COMMENTS),
+        where('productName', '==', productName),
+        orderBy('toc', 'desc'));
+    const snapShot = await getDocs(q);
+    const comments = [];
+    snapShot.forEach(doc => {
+        if(doc.data().email == uemail){
+            return 1;
+        }  
+    });
+    return 0;
 }

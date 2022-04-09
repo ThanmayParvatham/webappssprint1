@@ -1,4 +1,4 @@
-import { MENU, root } from './elements.js';
+import { MENU, modalTransaction, root } from './elements.js';
 import { ROUTE_PATHNAMES } from '../controller/route.js';
 import * as Util from './util.js';
 import { getProductList, getComments } from '../controller/firestore_controller.js';
@@ -61,17 +61,53 @@ export async function home_page() {
         getCommentsFrom[i].addEventListener('submit', async e => {
             e.preventDefault();
             const productName = e.target.gcProductName.value;
+            let html2 = `<h1>Comments on ${productName}</h1>`;
             //console.log(productName);
             try {
                 const cdata = await getComments(productName);
-                console.log(JSON.stringify(cdata)+ "^^)");
+                //console.log(JSON.stringify(cdata) + "^^)");
+                if (cdata.length == 0) {
+                    html2 += 'No comments Found!</h3>';
+                    modalTransaction.title.innerHTML = "Comment-Box";
+                modalTransaction.body.innerHTML = html2;
+                modalTransaction.modal.show();
+                    return;
+                }
+                html2 += `
+                <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">S.No</th>
+                    <th scope="col">User</th>
+                    <th scope="col">Comments</th>
+                    <th scope="col">Time of Comment</th>
+                  </tr>
+                </thead>
+                <tbody>
+                `;
+                for (let i = 0; i < cdata.length; i++) {
+                    html2 += `
+                    <tr>
+                        <td>
+                            ${i+1}
+                        </td>
+                        <td>${cdata[i].email}</td>
+                        <td>${cdata[i].comment}</td>
+                        <td>${new Date(cdata[i].toc).toString()}</td>
+                    </tr>
+                    `;
+                }
+            
+                html2 += '</tbody></table>';
+                modalTransaction.title.innerHTML = "Comment-Box";
+                modalTransaction.body.innerHTML = html2;
+                modalTransaction.modal.show();
             } catch (error) {
                 console.log(error);
             }
-            // const index = e.target.index.value;
             // modalTransaction.title.innerHTML = `Purchased At: ${new Date(carts[index].timestamp).toString()}`;
             // modalTransaction.modal.show();
-
+            
         })
     }
 }
@@ -85,7 +121,13 @@ function buildProductView(product, index) {
             <p class="card-text">
             ${Util.currency(product.price)}<br>
             ${product.summary}</p>
-
+            <form method="post" class="form-comment-get">
+    <input type="hidden" name="gcProductName" value="${product.name}">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+    <button type="submit" class="btn btn-outline-primary">View Comments</button>
+    </form>
             <div class="container pt-3 bg-light ${currentUser ? 'd-block' : 'd-none'}">
                 <form method="post" class="form-product-qty">
                     <input type="hidden" name="index" value="${index}">
@@ -98,13 +140,7 @@ function buildProductView(product, index) {
                     <button class="btn btn-outline-danger" type="submit"
                         onclick="this.form.submitter='INC'">&plus;</button>
                 </form>
-                <form method="post" class="form-comment-get">
-    <input type="hidden" name="gcProductName" value="${product.name}">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-    <button type="submit" class="btn btn-outline-primary">View Comments</button>
-    </form>
+                
             </div>
         </div>
     </div>

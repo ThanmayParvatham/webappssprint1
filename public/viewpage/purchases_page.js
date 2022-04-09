@@ -3,7 +3,7 @@ import { ROUTE_PATHNAMES } from '../controller/route.js';
 import * as Util from './util.js';
 import { UserComment } from '../model/userComment.js';
 import { currentUser } from '../controller/firebase_auth.js';
-import { getPurchaseHistory, returnPurchasedItem, uploadComment } from '../controller/firestore_controller.js';
+import { getPurchaseHistory, returnPurchasedItem, uploadComment,checkAlreadyCommented } from '../controller/firestore_controller.js';
 import { DEV } from '../model/constants.js';
 import { modalTransaction } from './elements.js';
 export function addEventListeners() {
@@ -121,6 +121,13 @@ export async function purchases_page() {
                         //await Util.sleep(5000);
 
                         const commentContent = f.target.commentContent.value;
+                        try {
+                            if(await checkAlreadyCommented(currentUser.email, commentProductName)){
+                                alert("You have already commented !");
+                            }
+                        } catch (error) {
+                            console.log(error);
+                        }
                             try {
                                  const commentEmail = currentUser.email;
                                 const Ctoc = Date.now();
@@ -139,7 +146,7 @@ export async function purchases_page() {
                                 //console.log("^" + JSON.stringify(data) );
                                 //await Util.sleep(50000000000000);
                                 //await Util.sleep(50000000000000);
-                                //alert('Commented Successfully !')
+                                alert('Commented Successfully !')
                             } catch (e) {
                                 if (DEV) console.log(e);
                             }
