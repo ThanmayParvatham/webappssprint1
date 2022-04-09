@@ -139,7 +139,7 @@ export async function purchases_page() {
                                 //console.log("^" + JSON.stringify(data) );
                                 //await Util.sleep(50000000000000);
                                 //await Util.sleep(50000000000000);
-                                alert('Commented Successfully !')
+                                //alert('Commented Successfully !')
                             } catch (e) {
                                 if (DEV) console.log(e);
                             }

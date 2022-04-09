@@ -1,54 +1,54 @@
-import { MENU,root } from './elements.js';
+import { MENU, root } from './elements.js';
 import { ROUTE_PATHNAMES } from '../controller/route.js';
 import * as Util from './util.js';
-import { getProductList } from '../controller/firestore_controller.js';
+import { getProductList, getComments } from '../controller/firestore_controller.js';
 import { DEV } from '../model/constants.js';
 import { currentUser } from '../controller/firebase_auth.js';
 import { cart } from './cart_page.js';
-export function addEventListeners(){
-    MENU.Home.addEventListener('click',async() => {
-        history.pushState(null,null,ROUTE_PATHNAMES.HOME);
+export function addEventListeners() {
+    MENU.Home.addEventListener('click', async () => {
+        history.pushState(null, null, ROUTE_PATHNAMES.HOME);
         const label = Util.disableButton(MENU.Home);
         await home_page();
-        Util.enableButton(MENU.Home,label);
+        Util.enableButton(MENU.Home, label);
     });
 }
-export async function home_page(){
+export async function home_page() {
 
     let html = '<h1>Enjoy the Shopping !</h1>';
     let products;
-    try{
+    try {
         products = await getProductList();
-        if(cart && cart.getTotalQty()!=0){
+        if (cart && cart.getTotalQty() != 0) {
             cart.items.forEach(item => {
                 const p = products.find(e => e.docId == item.docId)
-                if(p) p.qty = item.qty;                
+                if (p) p.qty = item.qty;
             });
         }
-    } catch(e) {
-        if(DEV) console.log(e);
-        Util.info('Failed to get the product list',JSON.stringify(e));
+    } catch (e) {
+        if (DEV) console.log(e);
+        Util.info('Failed to get the product list', JSON.stringify(e));
     }
-    for(let i=0;i<products.length;i++){
-        html += buildProductView(products[i],i)
+    for (let i = 0; i < products.length; i++) {
+        html += buildProductView(products[i], i)
     }
 
     root.innerHTML = html;
 
     const productForms = document.getElementsByClassName('form-product-qty');
-    for( let i=0 ; i < productForms.length ; i++){
-        productForms[i].addEventListener('submit',e => {
+    for (let i = 0; i < productForms.length; i++) {
+        productForms[i].addEventListener('submit', e => {
             e.preventDefault();
             const p = products[e.target.index.value];
             const submitter = e.target.submitter;
-            if(submitter == 'DEC'){
+            if (submitter == 'DEC') {
                 cart.removeItem(p);
-                if(p.qty > 0) --p.qty;
-            } else if (submitter == 'INC'){
+                if (p.qty > 0) --p.qty;
+            } else if (submitter == 'INC') {
                 cart.addItem(p);
-                p.qty = p.qty == null ? 1:p.qty + 1;
+                p.qty = p.qty == null ? 1 : p.qty + 1;
             } else {
-                if(DEV) console.log(e);
+                if (DEV) console.log(e);
                 return;
             }
             const updateQty = (p.qty == null || p.qty == 0) ? 'Add' : p.qty;
@@ -56,9 +56,27 @@ export async function home_page(){
             MENU.CartItemCount.innerHTML = `${cart.getTotalQty()}`;
         })
     }
+    const getCommentsFrom = document.getElementsByClassName('form-comment-get');
+    for (let i = 0; i < getCommentsFrom.length; i++) {
+        getCommentsFrom[i].addEventListener('submit', async e => {
+            e.preventDefault();
+            const productName = e.target.gcProductName.value;
+            //console.log(productName);
+            try {
+                const cdata = await getComments(productName);
+                console.log(JSON.stringify(cdata)+ "^^)");
+            } catch (error) {
+                console.log(error);
+            }
+            // const index = e.target.index.value;
+            // modalTransaction.title.innerHTML = `Purchased At: ${new Date(carts[index].timestamp).toString()}`;
+            // modalTransaction.modal.show();
+
+        })
+    }
 }
 
-function buildProductView(product, index){
+function buildProductView(product, index) {
     return `
     <div id="card-${product.docId}" class="card d-inline-flex" style="width: 18rem; display: inline-block;">
         <img src="${product.imageURL}" class="card-img-top">
@@ -80,8 +98,16 @@ function buildProductView(product, index){
                     <button class="btn btn-outline-danger" type="submit"
                         onclick="this.form.submitter='INC'">&plus;</button>
                 </form>
+                <form method="post" class="form-comment-get">
+    <input type="hidden" name="gcProductName" value="${product.name}">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+    <button type="submit" class="btn btn-outline-primary">View Comments</button>
+    </form>
             </div>
         </div>
     </div>
+    
     `;
 }

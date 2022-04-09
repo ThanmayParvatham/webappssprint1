@@ -11,6 +11,8 @@ import { purchases_page } from "../viewpage/purchases_page.js";
 import { COLLECTION_NAMES } from "../model/constants.js";
 import { Product } from "../model/product.js";
 import { ShoppingCart } from "../model/shopping_cart.js";
+import { currentUser } from "./firebase_auth.js";
+import { UserComment } from "../model/userComment.js";
 const db = getFirestore();
 
 export async function getProductList() {
@@ -84,7 +86,42 @@ export async function returnPurchasedItem(productDetail) {
 }
 
 export async function uploadComment(comment) {
+    // const q = query(collection(db, COLLECTION_NAMES.USER_COMMENTS));
+    // const snapShot = await getDocs(q);
+
+    //console.log(JSON.stringify(snapShot));
+    // if(!snapShot.empty){
+    //     console.log('Already commented !');
+    //     alert('User has already commented');
+    //     return;
+    // }
     const data = comment.serialize();
     await addDoc(collection(db, COLLECTION_NAMES.USER_COMMENTS), data);
-    //console.log(JSON.stringify(data));
+    console.log(JSON.stringify(data)); 
+    alert('commented Successfully !') 
+}
+export async function getComments(productName) {
+    // const docRef = doc(db, COLLECTION_NAMES.USER_COMMENTS, currentUser.uid);
+    // const snapshot = await getDoc(docRef);
+    // if (!snapshot.exists()) {
+    //     return null;
+    // }
+    // const r = new UserComment(snapshot.data());
+    // console.log(r);
+    // return r;
+    const q = query(collection(db, COLLECTION_NAMES.USER_COMMENTS),
+        where('productName', '==', productName),
+        orderBy('toc', 'desc'));
+    const snapShot = await getDocs(q);
+    const comments = [];
+    snapShot.forEach(doc => {
+    console.log("** " + JSON.stringify(doc.data()));
+        const eachComment = new UserComment();
+        eachComment.email = doc.data().email;
+        eachComment.productName = doc.data().productName;
+        eachComment.comment = doc.data().comment;
+        eachComment.toc = doc.data().toc;
+        comments.push(eachComment);
+    });
+    return comments;
 }
