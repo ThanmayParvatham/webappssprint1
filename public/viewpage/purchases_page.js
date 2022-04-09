@@ -3,7 +3,7 @@ import { ROUTE_PATHNAMES } from '../controller/route.js';
 import * as Util from './util.js';
 import { UserComment } from '../model/userComment.js';
 import { currentUser } from '../controller/firebase_auth.js';
-import { getPurchaseHistory, returnPurchasedItem, uploadComment,checkAlreadyCommented } from '../controller/firestore_controller.js';
+import { getPurchaseHistory, returnPurchasedItem, uploadComment, checkAlreadyCommented } from '../controller/firestore_controller.js';
 import { DEV } from '../model/constants.js';
 import { modalTransaction } from './elements.js';
 export function addEventListeners() {
@@ -114,43 +114,34 @@ export async function purchases_page() {
                 commentForms[i].addEventListener('submit', async e => {
                     e.preventDefault();
                     const commentProductName = e.target.commentProductName.value;
+                    var isExists = await checkAlreadyCommented(currentUser.email, commentProductName);
+                    console.log(isExists);
+                    if (isExists) {
+                        alert("You have already commented !");
+                        return;
+                    }
+
                     modalCreateComment.show();
                     const formCreateComment = document.getElementById('form-create-comment');
                     formCreateComment.addEventListener('submit', async f => {
                         e.preventDefault();
-                        //await Util.sleep(5000);
-
                         const commentContent = f.target.commentContent.value;
                         try {
-                            if(await checkAlreadyCommented(currentUser.email, commentProductName)){
-                                alert("You have already commented !");
-                            }
-                        } catch (error) {
-                            console.log(error);
+                            const commentEmail = currentUser.email;
+                            const Ctoc = Date.now();
+                            const data = new UserComment();
+                            data.productName = commentProductName;
+                            data.email = commentEmail;
+                            data.comment = commentContent;
+                            data.toc = Ctoc;
+
+                            await uploadComment(data);
+                            alert('Commented Successfully !')
+                        } catch (e) {
+                            if (DEV) console.log(e);
                         }
-                            try {
-                                 const commentEmail = currentUser.email;
-                                const Ctoc = Date.now();
-                                const data = new UserComment();
-                                data.productName = commentProductName;
-                                data.email = commentEmail;
-                                data.comment = commentContent;
-                                data.toc = Ctoc;
-                                // const finalData = new UserComment({
-                                //     commentProductName,
-                                //     commentEmail,
-                                //     commentContent,
-                                //     Ctoc
-                                // });
-                                await uploadComment(data);
-                                //console.log("^" + JSON.stringify(data) );
-                                //await Util.sleep(50000000000000);
-                                //await Util.sleep(50000000000000);
-                                alert('Commented Successfully !')
-                            } catch (e) {
-                                if (DEV) console.log(e);
-                            }
-                        
+
+
                     });
                 })
             }

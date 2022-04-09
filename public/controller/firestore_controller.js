@@ -130,11 +130,13 @@ export async function checkAlreadyCommented(uemail, productName) {
         where('productName', '==', productName),
         orderBy('toc', 'desc'));
     const snapShot = await getDocs(q);
-    const comments = [];
+    var returnValue = false;
     snapShot.forEach(doc => {
+        console.log(doc.data().email + "Result" + (doc.data().email == uemail));
         if(doc.data().email == uemail){
-            return 1;
+            returnValue =  true;
         }  
+        //return (doc.data().email == uemail);
     });
-    return 0;
+    return returnValue;
 }
